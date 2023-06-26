@@ -1,0 +1,14 @@
+import_from_git(
+  url: is_ci ? "https://github.com/olxbr/app-lanes.git" : "git@github.com:olxbr/app-lanes.git",
+  path: "android/Fastfile",
+  dependencies: ["cross-platform/Fastfile"],
+  branch: "chore/https")
+
+mergeDefaults({
+  :name => "<YOUR_REPO_NAME_HERE>", #e.g: Android Views
+  :module => "lib",
+  :repo => "olxbr/<YOUR_REPO_NAME_HERE>", #e.g: olxbr/android-views
+  :path => "#{Dir.pwd}/.."
+})
+
+default_platform(:android)

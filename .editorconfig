@@ -1,0 +1,13 @@
+# EditorConfig is awesome: https://EditorConfig.org
+
+# top-most EditorConfig file
+root = true
+
+# This is needed because incompatibilities across ktlint and kotlin compiler:
+# Issue: https://github.com/pinterest/ktlint/issues/527
+
+# The disable intent rule is because a problem that is affecting other devs:
+# https://github.com/pinterest/ktlint/issues/805
+# https://github.com/pinterest/ktlint/issues/816
+[*.{kt,kts}]
+disabled_rules=import-ordering,indent

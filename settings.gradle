@@ -1,0 +1,35 @@
+pluginManagement {
+    repositories {
+        gradlePluginPortal()
+        google()
+        mavenCentral()
+    }
+}
+
+dependencyResolutionManagement {
+    repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
+    repositories {
+        google()
+        mavenCentral()
+        maven {
+            def httpsNexus = System.getenv("OLX_NEXUS_URL")
+            if (httpsNexus != null) {
+                credentials(HttpHeaderCredentials) {
+                    name = "Proxy-Authorization"
+                    value = System.getenv("OLX_NEXUS_JAVA_PROXY_AUTHORIZATION")
+                }
+                authentication {
+                    header(HttpHeaderAuthentication)
+                }
+            }
+            def httpNexus = "http://nexus.olxbr.io"
+            def nexus = httpsNexus == null ? httpNexus : httpsNexus
+            url nexus + "/repository/maven-releases/"
+            allowInsecureProtocol = true
+        }
+    }
+}
+
+rootProject.name = "Template"
+include ':app'
+include ':lib'

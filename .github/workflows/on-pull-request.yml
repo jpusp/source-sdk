@@ -1,0 +1,128 @@
+#name: PR Workflow
+#
+#on:
+#  pull_request:
+#    branches:
+#      - main
+#
+#env:
+#  OLX_NEXUS_JAVA_PROXY_AUTHORIZATION: ${{secrets.OLX_NEXUS_JAVA_PROXY_AUTHORIZATION}}
+#  OLX_NEXUS_URL: 'https://proxy-nexus.olxbr.io'
+#
+#jobs:
+#  cancel-previous-workflows:
+#    if: github.head_ref != 'chore/bump'
+#    runs-on: ubuntu-latest
+#    timeout-minutes: 1
+#    steps:
+#      - uses: styfle/cancel-workflow-action@0.9.1
+#        with:
+#          access_token: ${{ github.token }}
+#
+#  build-debug:
+#    runs-on: ubuntu-latest
+#    needs: cancel-previous-workflows
+#    steps:
+#      - uses: actions/checkout@v2
+#      - uses: actions/setup-java@v2
+#        with:
+#          distribution: 'temurin'
+#          java-version: '11'
+#
+#      - uses: actions/cache@v2
+#        with:
+#          path: |
+#            ~/.gradle/caches
+#            ~/.gradle/wrapper
+#          key: ${{ runner.os }}-${{ hashFiles('**/*.gradle*') }}-${{ hashFiles('**/gradle/wrapper/gradle-wrapper.properties') }}
+#
+#      - name: Create local properties
+#        run: touch local.properties
+#
+#      - run: ./gradlew -PciBuild=true :lib:assembleDebug :testlab:assembleDebug :testlab:assembleDebugAndroidTest
+#
+#      - name: Upload app APK
+#        uses: actions/upload-artifact@v2
+#        with:
+#          name: testlab-debug
+#          path: testlab/build/outputs/apk/debug/testlab-debug.apk
+#          retention-days: 1
+#
+#      - name: Upload Android Test APK
+#        uses: actions/upload-artifact@v2
+#        with:
+#          name: testlab-debug-androidTest
+#          path: testlab/build/outputs/apk/androidTest/debug/testlab-debug-androidTest.apk
+#          retention-days: 1
+#
+#  check-code:
+#    needs: build-debug
+#    runs-on: ubuntu-latest
+#    steps:
+#      - uses: actions/checkout@v2
+#      - uses: actions/setup-java@v2
+#        with:
+#          distribution: 'temurin'
+#          java-version: '11'
+#
+#      - name: Create local properties
+#        run: touch local.properties
+#
+#      - name: Run linters
+#        run: ./gradlew :lib:detekt :lib:ktlintCheck :lib:lintDebug
+#
+#  unit-tests:
+#    needs: build-debug
+#    runs-on: ubuntu-latest
+#    steps:
+#      - uses: actions/checkout@v2
+#      - uses: actions/setup-java@v2
+#        with:
+#          distribution: 'temurin'
+#          java-version: '11'
+#
+#      - name: Create local properties
+#        run: touch local.properties
+#
+#      - name: Run unit tests
+#        run: ./gradlew :lib:testDebugUnitTest
+#
+#  instrumented-tests:
+#    name: Run UI tests with Firebase Test Lab
+#    needs: build-debug
+#    runs-on: ubuntu-latest
+#    steps:
+#      - uses: actions/checkout@v2
+#      - name: Download app APK
+#        uses: actions/download-artifact@v2
+#        with:
+#          name: testlab-debug
+#
+#      - name: Download Android test APK
+#        uses: actions/download-artifact@v2
+#        with:
+#          name: testlab-debug-androidTest
+#
+#      - name: Login to Google Cloud
+#        uses: google-github-actions/setup-gcloud@master
+#        with:
+#          project_id: ${{ secrets.FIREBASE_PROJECT_ID }}
+#          service_account_key: ${{ secrets.GCLOUD_AUTH }}
+#          export_default_credentials: true
+#
+#      - name: Set current project
+#        run: gcloud config set project ${{ secrets.FIREBASE_PROJECT_ID }}
+#
+#      - name: Run Instrumentation Tests in Firebase Test Lab
+#        run: gcloud firebase test android run --type instrumentation --app /home/runner/work/android-views/android-views/testlab-debug.apk --test /home/runner/work/android-views/android-views/testlab-debug-androidTest.apk --device model=redfin,version=30,locale=en_US,orientation=portrait
+#
+#  delete-artifacts:
+#    if: always()
+#    needs: instrumented-tests
+#    runs-on: ubuntu-latest
+#    steps:
+#      - uses: geekyeggo/delete-artifact@v1
+#        with:
+#          name: |
+#            testlab-debug
+#            testlab-debug-androidTest

@@ -1,0 +1,38 @@
+#name: Release Workflow
+#
+#on:
+#  pull_request:
+#    branches:
+#      - main
+#    types:
+#      - closed
+#
+#jobs:
+#  release:
+#    runs-on: ubuntu-latest
+#    if: github.event.pull_request.merged == true && github.head_ref == 'chore/bump'
+#    env:
+#      OLX_NEXUS_JAVA_PROXY_AUTHORIZATION: ${{secrets.OLX_NEXUS_JAVA_PROXY_AUTHORIZATION}}
+#      OLX_NEXUS_URL: 'https://proxy-nexus.olxbr.io'
+#      GITHUB_API_TOKEN: ${{ secrets.OLXBR_BOT_PAT_GH_TOKEN }}
+#    steps:
+#      - uses: actions/checkout@v2
+#      - uses: actions/setup-java@v2
+#        with:
+#          distribution: 'temurin'
+#          java-version: '11'
+#
+#      - name: Set up git config
+#        run: |
+#          git config user.name "olxbr-bot"
+#          git config user.email "olxbr-bot@olxbr.com"
+#          git config --global url."https://${{ secrets.OLXBR_BOT_PAT_GH_TOKEN }}@github.com/olxbr/".insteadOf https://github.com/olxbr/
+#
+#      - name: Touch local properties
+#        run: touch local.properties
+#
+#      - name: Install Fastlane
+#        run: sudo gem install bundler && bundle update
+#
+#      - name: Publish release
+#        run: bundle exec fastlane publish_artifactory

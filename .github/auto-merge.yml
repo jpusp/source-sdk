@@ -1,0 +1,11 @@
+branch: main
+
+matchAllLabelRules: true
+requiredLabel:
+  - approved
+
+matchAllAuthorRules: true
+requiredAuthor:
+  - olxbr-bot
+
+mergeMethod: merge

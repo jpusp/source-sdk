@@ -1,0 +1,62 @@
+apply plugin: "maven-publish"
+
+publishing {
+    publications {
+        release(MavenPublication) {
+            groupId = "com.olxbr"
+            artifactId = "${rootProject.name}"
+            version = getVersionProperty("version")
+
+            artifact("$buildDir/outputs/aar/${project.getName()}-release.aar")
+        }
+        internal(MavenPublication) {
+            groupId = "com.olxbr"
+            artifactId = "${rootProject.name}"
+            version = getMavenLocalVersionProperty("version")
+            artifact("$buildDir/outputs/aar/${project.getName()}-release.aar")
+        }
+    }
+    repositories {
+        maven {
+            name = "maven"
+            url = getLocalProperty("OLX_NEXUS_URL") + '/repository/maven-releases/'
+            allowInsecureProtocol = true
+            credentials(HttpHeaderCredentials) {
+                name = "Authorization"
+                value = getLocalProperty("OLX_NEXUS_JAVA_PROXY_AUTHORIZATION")
+            }
+            authentication {
+                header(HttpHeaderAuthentication)
+            }
+        }
+    }
+}
+
+task artifactoryPublish {
+    dependsOn 'publishReleasePublicationToMavenRepository'
+}
+
+def getLocalProperty(key) {
+    def env = System.getenv(key)
+    if (env != null && !env.isEmpty()) {
+        return env
+    }
+    Properties properties = new Properties()
+    properties.load(project.rootProject.file("local.properties").newDataInputStream())
+    return properties.getProperty(key)
+}
+
+def getVersionProperty(key) {
+    Properties properties = new Properties()
+    properties.load(file("$rootDir/lib/version.properties").newDataInputStream())
+    return properties.getProperty(key)
+}
+
+def getMavenLocalVersionProperty(key) {
+    def versionProperty = getVersionProperty(key)
+    return versionProperty + "-SNAPSHOT-" + getDFormattedDate()
+}
+
+static def getDFormattedDate() {
+    return new Date().format('yyyyMMddHHmmss')
+}
