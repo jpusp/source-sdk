@@ -33,3 +33,5 @@ dependencyResolutionManagement {
 rootProject.name = "Template"
 include ':app'
 include ':lib'
+include ':app:analytics'
+include ':app:remoteconfig'
