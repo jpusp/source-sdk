@@ -1,0 +1,28 @@
+#name: Merge Chore/Bump Workflow
+#
+#on:
+#  pull_request:
+#    branches:
+#      - main
+#
+#jobs:
+#  build-debug:
+#    runs-on: ubuntu-latest
+#    if: github.head_ref == 'chore/bump'
+#    steps:
+#      - run: echo "skip build-debug for chore/bump"
+#
+#  check-code:
+#    runs-on: ubuntu-latest
+#    steps:
+#      - run: echo "skip check-code for chore/bump"
+#
+#  unit-tests:
+#    runs-on: ubuntu-latest
+#    steps:
+#      - run: echo "skip unit-tests for chore/bump"
+#
+#  instrumented-tests:
+#    runs-on: ubuntu-latest
+#    steps:
+#      - run: echo "skip instrumented for chore/bump"

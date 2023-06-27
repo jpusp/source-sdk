@@ -1,0 +1,40 @@
+#name: Merge Workflow
+#
+#on:
+#  pull_request:
+#    branches:
+#      - main
+#    types:
+#      - closed
+#
+#jobs:
+#  bump-tag:
+#    runs-on: ubuntu-latest
+#    if: github.event.pull_request.merged == true && github.head_ref != 'chore/bump'
+#    env:
+#      GITHUB_API_TOKEN: ${{ secrets.OLXBR_BOT_PAT_GH_TOKEN }}
+#    steps:
+#      - uses: actions/checkout@v2
+#        with:
+#          fetch-depth: 0
+#
+#      - name: Set up git config
+#        run: |
+#          git config user.name "olxbr-bot"
+#          git config user.email "olxbr-bot@olxbr.com"
+#          git config --global url."https://${{ secrets.OLXBR_BOT_PAT_GH_TOKEN }}@github.com/olxbr/".insteadOf https://github.com/olxbr/
+#
+#      - name: Fetch tags
+#        run: git fetch --all --tags
+#
+#      - name: Setup Ruby
+#        uses: ruby/setup-ruby@v1
+#        with:
+#          ruby-version: '2.7.0'
+#          bundler-cache: true
+#
+#      - name: Bump version
+#        run: bundle exec fastlane bump
+#
+#      - name: Push tag
+#        run: bundle exec fastlane tag version:`cat lib/version.properties | grep "version" | cut -d'=' -f2`
