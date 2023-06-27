@@ -2,5 +2,5 @@ package com.example.analytics.ui
 
 interface AnalyticsProvider {
 
-    fun sendEvent(data: Map<String, Any>)
+    fun sendEvent(data: Map<String, Int>)
 }
